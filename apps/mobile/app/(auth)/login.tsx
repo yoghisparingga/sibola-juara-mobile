@@ -7,14 +7,37 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { useAuthStore } from '@/store/auth';
 
+const isValidEmailOrPhone = (v: string) =>
+  /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v) || /^\+?\d[\d\s-]{6,}$/.test(v);
+
 export default function LoginScreen() {
   const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onLogin = () => {
+    if (!email.trim() || !password) {
+      setError('Email/phone and password are required.');
+      return;
+    }
+    if (!isValidEmailOrPhone(email.trim())) {
+      setError('Enter a valid email or phone number.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    setError(null);
+    if (user) login({ ...user, email: email.trim() });
+    router.replace('/(auth)/onboarding');
+  };
+
+  const onSocialLogin = () => {
+    setError(null);
     if (user) login(user);
     router.replace('/(auth)/onboarding');
   };
@@ -67,6 +90,10 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
+        {error ? (
+          <Text className="mt-3 text-sm text-danger font-medium">{error}</Text>
+        ) : null}
+
         <View className="mt-5">
           <Button label="Login" onPress={onLogin} />
         </View>
@@ -82,13 +109,13 @@ export default function LoginScreen() {
             label="Continue with Google"
             variant="outline"
             leading={<Ionicons name="logo-google" size={18} color="#EA4335" />}
-            onPress={onLogin}
+            onPress={onSocialLogin}
           />
           <Button
             label="Continue with Apple"
             variant="outline"
             leading={<Ionicons name="logo-apple" size={18} color="#000" />}
-            onPress={onLogin}
+            onPress={onSocialLogin}
           />
         </View>
 

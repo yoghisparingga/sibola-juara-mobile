@@ -76,6 +76,9 @@ bookingsRouter.patch('/:id/cancel', async (req, res) => {
   const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
   if (!booking) return res.status(404).json({ error: 'Not found' });
   if (booking.userId !== req.user!.userId) return res.status(403).json({ error: 'Forbidden' });
+  if (booking.status === 'completed' || booking.status === 'cancelled') {
+    return res.status(400).json({ error: `Cannot cancel a ${booking.status} booking` });
+  }
   const updated = await prisma.booking.update({
     where: { id: booking.id },
     data: { status: 'cancelled' },

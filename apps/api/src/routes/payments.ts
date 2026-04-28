@@ -18,6 +18,12 @@ paymentsRouter.post('/charge', async (req, res) => {
   const booking = await prisma.booking.findUnique({ where: { id: parsed.data.bookingId } });
   if (!booking) return res.status(404).json({ error: 'Booking not found' });
   if (booking.userId !== req.user!.userId) return res.status(403).json({ error: 'Forbidden' });
+  if (booking.status === 'cancelled') {
+    return res.status(400).json({ error: 'Cannot pay for a cancelled booking' });
+  }
+  if (booking.payment === 'paid') {
+    return res.status(400).json({ error: 'Booking is already paid' });
+  }
 
   const updated = await prisma.booking.update({
     where: { id: booking.id },
