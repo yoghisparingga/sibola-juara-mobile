@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import cors from 'cors';
-import express from 'express';
+import express, { type ErrorRequestHandler } from 'express';
 
 import { authRouter } from './routes/auth';
 import { fieldsRouter } from './routes/fields';
@@ -29,6 +29,13 @@ app.use('/fields', fieldsRouter);
 app.use('/bookings', bookingsRouter);
 app.use('/payments', paymentsRouter);
 app.use('/analytics', analyticsRouter);
+
+const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  console.error('[sibola-juara-api] unhandled error:', err);
+  if (res.headersSent) return;
+  res.status(500).json({ error: 'Internal server error' });
+};
+app.use(errorHandler);
 
 const port = Number(process.env.PORT || 4000);
 if (process.env.NODE_ENV !== 'test') {

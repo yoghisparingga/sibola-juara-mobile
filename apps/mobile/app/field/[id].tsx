@@ -3,11 +3,11 @@ import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
 import { Button } from '@/components/Button';
 import { fields } from '@/data/mockData';
 import { formatIDRFull } from '@/lib/format';
+import { MapPanel } from './MapPanel';
 
 const SLOT_DAYS = [
   { label: 'Sun', date: 'May 18' },
@@ -120,23 +120,7 @@ export default function FieldDetailScreen() {
         </View>
 
         {showMap ? (
-          <View className="rounded-2xl overflow-hidden mt-6 h-48 border border-ink-100">
-            <MapView
-              provider={PROVIDER_DEFAULT}
-              style={{ flex: 1 }}
-              initialRegion={{
-                latitude: field.latitude,
-                longitude: field.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-            >
-              <Marker
-                coordinate={{ latitude: field.latitude, longitude: field.longitude }}
-                title={field.name}
-              />
-            </MapView>
-          </View>
+          <MapPanel latitude={field.latitude} longitude={field.longitude} title={field.name} />
         ) : null}
 
         <View className="mt-6">
